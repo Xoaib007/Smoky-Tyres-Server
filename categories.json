@@ -1,0 +1,37 @@
+[
+    {
+        "name":"Daily Commuter",
+        "model": "https://i.ibb.co/hCQnzgZ/daily-commuter-car.png",
+        "icon": "https://i.ibb.co/CWd7Fpk/daily-commuter.png"
+    },
+    {
+        "name":"Eco Friendly",
+        "model": "https://i.ibb.co/SBSZBBK/ecofriendly.png",
+        "icon": "https://i.ibb.co/5TCBHXr/ecofriendly-icon.png"
+    },
+    {
+        "name":"Family Car",
+        "model": "https://i.ibb.co/rcZzXpx/familycar-car-icon.png",
+        "icon": "https://i.ibb.co/WgxZYKS/familycar-icon.png"
+    },
+    {
+        "name":"Grand Tourer",
+        "model": "https://i.ibb.co/y4wFj5M/grand-tourer.png",
+        "icon": "https://i.ibb.co/vmPb3B8/grand-tourer-icon.png"
+    },
+    {
+        "name":"Performance",
+        "model": "https://i.ibb.co/FsyT6Sn/performance.png",
+        "icon": "https://i.ibb.co/N1FQhWW/performance-icon.png"
+    },
+    {
+        "name":"Special Edition",
+        "model": "https://i.ibb.co/DYsb3nG/special-edition-car.png",
+        "icon": "https://i.ibb.co/Z2h0Ycn/special-edition.png"
+    },
+    {
+        "name":"Super Car",
+        "model": "https://i.ibb.co/kXKpQFL/supercar-car-icon.png",
+        "icon": "https://i.ibb.co/VSTf6nf/supercar-icon.png"
+    }
+]
