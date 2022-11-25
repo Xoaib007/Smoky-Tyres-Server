@@ -17,6 +17,7 @@ async function run(){
     try{
         const categoriesCollection = client.db('smoky-tyres').collection('categories');
         const carsCollection = client.db('smoky-tyres').collection('cars');
+        const userCollection = client.db('smoky-tyres').collection('user');
 
         app.get('/categories', async(req,res)=>{
             const query= {};
@@ -37,6 +38,28 @@ async function run(){
             const query= {};
             const categories= await carsCollection.find(query).toArray();
             res.send(categories);
+        })
+
+        // Users
+
+        app.get('/users', async (req,res)=>{
+            const query= {};
+            const allUsers= await userCollection.find(query).toArray();
+            res.send(allUsers)
+        })
+
+        app.get('/users/:email', async (req,res)=>{
+            const email=req.params.email;
+            const query= {email: email};
+            const result= await userCollection.findOne(query);
+            res.send(result)
+        })
+
+        app.post('/users', async (req, res)=>{
+            const user = req.body;
+            console.log(user);
+            const result = await userCollection.insertOne(user);
+            res.send(result)
         })
     }
     finally{
