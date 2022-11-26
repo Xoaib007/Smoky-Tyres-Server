@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.REACT_APP_DBUSER}:${process.env.REACT_APP_DBPASSWORD}@cluster0.7grdkwx.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
@@ -36,8 +36,29 @@ async function run(){
 
         app.get('/cars', async(req,res)=>{
             const query= {};
-            const categories= await carsCollection.find(query).toArray();
-            res.send(categories);
+            const cars= await carsCollection.find(query).toArray();
+            res.send(cars);
+        })
+
+        app.get('/cars/email/:email', async(req,res)=>{
+            const email= req.params.email;
+            const query= {sellerEmail:email};
+            const result= await carsCollection.find(query).toArray();
+            res.send(result);
+        })
+
+        app.get('/cars/id/:id', async(req,res)=>{
+            const id= req.params.id;
+            const filter= {_id: ObjectId(id)};
+            console.log(filter)
+            const result= await carsCollection.findOne(filter);
+            res.send(result);
+        })
+
+        app.post('/cars', async(req,res)=>{
+            const car= req.body;
+            const result= await carsCollection.insertOne(car);
+            res.send(result)
         })
 
         // Users
