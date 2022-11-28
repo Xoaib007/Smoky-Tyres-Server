@@ -22,6 +22,9 @@ async function run(){
         const userCollection = client.db('smoky-tyres').collection('user');
         const testDriveCollection= client.db('smoky-tyres').collection('test-drive')
         const paymentsCollection= client.db('smoky-tyres').collection('payments')
+        const saveCarsCollection= client.db('smoky-tyres').collection('saved-cars')
+        const reportedPostsCollection= client.db('smoky-tyres').collection('reported-post')
+        const advertisementCollection= client.db('smoky-tyres').collection('advertiseded-post')
 
         app.get('/categories', async(req,res)=>{
             const query= {};
@@ -64,6 +67,30 @@ async function run(){
             res.send(result)
         })
 
+        
+        app.delete('/cars/:id', async (req,res)=>{
+            const id= req.params.id;
+            const query = {_id: ObjectId(id)};
+            const result= await carsCollection.deleteOne(query);
+            res.send(result)
+        })
+
+        // Advertisement
+
+        app.post('/advertise', async(req,res)=>{
+            const post= req.body;
+            const query= {_id: ObjectId(post)};
+            const filter= await carsCollection.findOne(query);
+            const result= advertisementCollection.insertOne(filter);
+            res.send(result)
+        })
+        
+        app.get('/advertise', async(req,res)=>{
+            const query={};
+            const result= await advertisementCollection.find(query).toArray();
+            res.send(result)
+        })
+
         // Users
 
         app.get('/users', async (req,res)=>{
@@ -82,6 +109,42 @@ async function run(){
         app.post('/users', async (req, res)=>{
             const user = req.body;
             const result = await userCollection.insertOne(user);
+            res.send(result)
+        })
+
+        app.get('/user/buyers', async (req, res)=>{
+            const query= {role: 'Buyer'}
+            const result = await userCollection.find(query).toArray();
+            res.send(result)
+        })
+
+        app.patch('/user/buyers/:id', async (req, res)=>{
+            const id= req.params.id
+            const query= {_id: ObjectId(id)}
+            const updateDoc={
+                $set:{
+                    isVerified: true
+                }
+            }
+            const result = await userCollection.updateOne(query, updateDoc);
+            res.send(result)
+        })
+        
+        app.get('/user/sellers', async (req, res)=>{
+            const query= {role: 'Seller'};
+            const result = await userCollection.find(query).toArray();
+            res.send(result)
+        })
+
+        app.patch('/user/sellers/:id', async (req, res)=>{
+            const id= req.params.id
+            const query= {_id: ObjectId(id)}
+            const updateDoc={
+                $set:{
+                    isVerified: true
+                }
+            }
+            const result = await userCollection.updateOne(query, updateDoc);
             res.send(result)
         })
 
@@ -114,6 +177,57 @@ async function run(){
             res.send(buyerAllBooking)
         })
 
+        // Saved Product
+
+        app.post('/savedpost', async(req, res)=>{
+            const car= req.body;
+            const result =await saveCarsCollection.insertOne(car);
+            res.send(result)
+        })
+
+        app.delete('/savedpost/:id', async (req,res)=>{
+            const id= req.params.id;
+            const query = {car: id};
+            const result= await saveCarsCollection.deleteOne(query);
+            res.send(result)
+        })
+
+        app.get('/savedpost/:id', async(req, res)=>{
+            const id= req.params.id;
+            const query= {car: id};
+            const savedCar= await saveCarsCollection.find(query).toArray();
+            res.send(savedCar)
+        })
+        
+        app.get('/savedpost/user/:email', async(req, res)=>{
+            const email= req.params.email;
+            const query= {buyerEmail: email};
+            const savedCar= await saveCarsCollection.find(query).toArray();
+            res.send(savedCar)
+        })
+
+        // Reported Posts
+
+        app.post('/reportedpost', async(req,res)=>{
+            const post= req.body;
+            const result =await reportedPostsCollection.insertOne(post);
+            res.send(result)
+        })
+
+        app.get('/reportedpost', async(req,res)=>{
+            const query= {};
+            const result= await reportedPostsCollection.find(query).toArray();
+            res.send(result)
+        })
+
+        app.delete('/reportedpost/:id', async (req,res)=>{
+            const id= req.params.id;
+            const query = {car:`${id}`};
+            const result= await reportedPostsCollection.deleteOne(query);
+            res.send(result)
+        })
+
+
         // Stripe / Payment
 
         app.post("/create-payment-intent", async (req, res) => {
@@ -137,7 +251,9 @@ async function run(){
             const id= payment.bookingId;
             const filter= {_id:ObjectId(id)};
             const updateDoc={
-                isPaid: true   
+                $set: {
+                    isPaid: true
+                }   
             }
             const update= await testDriveCollection.updateOne(filter, updateDoc)
             res.send(result)
