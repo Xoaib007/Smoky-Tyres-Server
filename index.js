@@ -4,6 +4,8 @@ const cors = require('cors');
 const app = express();
 const port = process.env.Port || 5000;
 
+const stripe = require("stripe")(process.env.REACT_KEY_STRIPE_SK);
+
 app.use(cors());
 app.use(express.json());
 
@@ -18,6 +20,8 @@ async function run(){
         const categoriesCollection = client.db('smoky-tyres').collection('categories');
         const carsCollection = client.db('smoky-tyres').collection('cars');
         const userCollection = client.db('smoky-tyres').collection('user');
+        const testDriveCollection= client.db('smoky-tyres').collection('test-drive')
+        const paymentsCollection= client.db('smoky-tyres').collection('payments')
 
         app.get('/categories', async(req,res)=>{
             const query= {};
@@ -29,7 +33,7 @@ async function run(){
 
         app.get('/cars/:categoryid', async(req,res)=>{
             const categoryId= req.params.categoryid;
-            const filter= {"category": `${categoryId}`};
+            const filter= {category:categoryId};
             const result= await carsCollection.find(filter).toArray();
             res.send(result)
         })
@@ -50,7 +54,6 @@ async function run(){
         app.get('/cars/id/:id', async(req,res)=>{
             const id= req.params.id;
             const filter= {_id: ObjectId(id)};
-            console.log(filter)
             const result= await carsCollection.findOne(filter);
             res.send(result);
         })
@@ -78,10 +81,69 @@ async function run(){
 
         app.post('/users', async (req, res)=>{
             const user = req.body;
-            console.log(user);
             const result = await userCollection.insertOne(user);
             res.send(result)
         })
+
+        // Test Drive Booking
+
+        app.post('/testdrivebooking', async(req,res)=>{
+            const booking= req.body;
+            const result= await testDriveCollection.insertOne(booking);
+            res.send(result)
+        })
+
+        app.delete('/testdrivebooking/:id', async (req,res)=>{
+            const id= req.params.id;
+            const query = {_id: ObjectId(id)};
+            const result= await testDriveCollection.deleteOne(query);
+            res.send(result)
+        })
+
+        app.get('/testdrivebooking/:id', async (req,res)=>{
+            const id= req.params.id;
+            const query = {_id: ObjectId(id)};
+            const result= await testDriveCollection.findOne(query);
+            res.send(result)
+        })
+
+        app.get('/testdrivebooking/buyer/:email', async(req,res)=>{
+            const email= req.params.email;
+            const filter= {buyerEmail:email };
+            const buyerAllBooking= await testDriveCollection.find(filter).toArray();
+            res.send(buyerAllBooking)
+        })
+
+        // Stripe / Payment
+
+        app.post("/create-payment-intent", async (req, res) => {
+            const { price } = req.body;
+            const price2= price*100;
+            const paymentIntent = await stripe.paymentIntents.create({
+              amount: price2,
+              currency: "usd",
+              payment_method_types: ['card']
+            });
+
+            res.send({
+                clientSecret: paymentIntent.client_secret,
+            });
+        })
+
+        app.post('/payment', async(req,res)=>{
+            const payment= req.body;
+            const result= await paymentsCollection.insertOne(payment);
+
+            const id= payment.bookingId;
+            const filter= {_id:ObjectId(id)};
+            const updateDoc={
+                isPaid: true   
+            }
+            const update= await testDriveCollection.updateOne(filter, updateDoc)
+            res.send(result)
+        })
+
+        
     }
     finally{
 
